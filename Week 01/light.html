@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<style>
+div {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background-color: grey
+}
+
+.green.light {
+    background-color: green;
+}
+
+.red.light {
+    background-color: red;
+}
+
+.orange.light {
+    background-color: orange;
+}
+</style>
+
+<body>
+    <div class="green"></div>
+    <div class="red"></div>
+    <div class="orange"></div>
+</body>
+<script>
+function changeGreen() {
+    let lights = document.getElementsByTagName('div');
+    for (let i = 0; i < lights.length; i++) {
+        lights[i].classList.remove("light");
+    }
+    document.getElementsByClassName("green")[0].classList.add("light")
+}
+
+function changeRed() {
+    let lights = document.getElementsByTagName("div");
+    for (let i = 0; i < lights.length; i++) {
+        lights[i].classList.remove("light")
+    }
+    document.getElementsByClassName("red")[0].classList.add("light");
+}
+
+function changeOrange() {
+    let lights = document.getElementsByTagName("div");
+    for (let i = 0; i < lights.length; i++) {
+        lights[i].classList.remove("light");
+    }
+    document.getElementsByClassName("orange")[0].classList.add("light");
+}
+
+function sleep(t) {
+    return new Promise((resolve, reject) => {
+        setTimeout(resolve, t)
+    })
+}
+
+// await
+async function go() {
+    while (true) {
+        changeGreen();
+        await sleep(1000);
+        changeRed();
+        await sleep(500);
+        changeOrange();
+        await sleep(200);
+    }
+}
+
+
+//promise
+// function go(){
+// 	changeGreen()
+// 	sleep(1000).then(()=>{
+// 		changeOrange()
+// 		return sleep(200)
+// 	}).then(()=>{
+// 		changeRed()
+// 		return sleep(500)
+// 	}).then(go)
+// }
+
+//回调函数
+// function go() {
+//     changeGreen()
+//     setTimeout(function() {
+//         changeOrange()
+//         setTimeout(function() {
+//             changeRed()
+//             setTimeout(function() {
+//                 go()
+//             }, 5000);
+//         }, 2000);
+//     }, 10000);
+// }
+go();
+</script>
+
+</html>

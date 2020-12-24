@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+    .cell {
+        background: green;
+        width: 100px;
+        height: 100px;
+        display: inline-block;
+        vertical-align: middle;
+        font-size: 32px;
+        line-height: 100px;
+        border: solid 1px #fff;
+        text-align: center;
+
+    }
+    </style>
+</head>
+
+<body>
+    <div id="board"></div>
+</body>
+<script>
+let patten = [
+    [0, 0, 0],
+    [0, 0, 0],
+    [0, 0, 0]
+]
+let color = 1;
+
+function show() {
+    let board = document.getElementById('board');
+    board.innerHTML = "";
+    for (let i = 0; i < 3; i++) {
+        for (let j = 0; j < 3; j++) {
+            let cell = document.createElement('div');
+            cell.classList.add('cell');
+            cell.innerHTML = patten[i][j] == 2 ? 'x' : patten[i][j] == 1 ? 'o' : '';
+            cell.addEventListener("click", () => userMove(j, i));
+            board.appendChild(cell);
+        }
+        board.appendChild(document.createElement('br'));
+    }
+
+}
+
+function userMove(x, y) {
+    patten[y][x] = color;
+    if (check(patten,color)) {
+        alert(color == 2 ? "X is winner" : "O is winner");
+    }
+    color = 3 - color;
+    console.log(bestChoice(patten,color));
+    show();
+    computerMove()
+    // if(willWin(patten,color)){
+    //     alert(color == 2 ? "X will win" : "O will win");
+    // }
+}
+
+function computerMove(){
+    let choice=bestChoice(patten,color);
+    if(choice.point){
+        patten[choice.point[1]][choice.point[0]]=color;
+    }
+    if (check(patten,color)) {
+        alert(color == 2 ? "X is winner" : "O is winner");
+    }
+    color = 3 - color;
+    show();
+}
+
+function check(patten,color) {
+    for (let i = 0; i < 3; i++) {
+        let win = true;
+        for (let j = 0; j < 3; j++) {
+            if (patten[i][j] != color) {
+                win = false;
+            }
+        }
+        if (win) {
+            return true;
+        }
+    }
+    for (let i = 0; i < 3; i++) {
+        let win = true;
+        for (let j = 0; j < 3; j++) {
+            if (patten[j][i] != color) {
+                win = false;
+            }
+        }
+        if (win) {
+            return true;
+        }
+    } 
+    {
+        let win = true;
+        for (let i = 0; i < 3; i++) {
+            if (patten[i][i] != color) {
+                win = false;
+            }
+        }
+        if (win) return true;
+    }
+    {
+        let win = true;
+        for (let i = 0; i < 3; i++) {
+            if (patten[i][2-i] != color) {
+                win = false;
+            }
+        }
+        if (win) return true;
+    }
+    return false;
+}
+function clone(patten){
+    return JSON.parse(JSON.stringify(patten));
+
+}
+function willWin(patten,color){
+    for(let i=0;i<3;i++){
+        for(let j=0;j<3;j++){
+            if(patten[i][j]){
+                continue;
+            }
+            let tmp=clone(patten);
+            tmp[i][j]=color;
+            if(check(tmp,color)){
+                return [j,i];
+            }
+        }       
+    }
+    return null;
+}
+function bestChoice(patten,color){
+    let p;
+    if(p=willWin(patten,color)){
+        return{
+            point:p,
+            result:1
+        }
+    }
+    let result=-2;
+    let point=null;
+    for(let i=0;i<3;i++){
+        for(let j=0;j<3;j++){
+            if(patten[i][j]){
+                continue;
+            }
+            let tmp=clone(patten);
+            tmp[i][j]=color;
+            let r=bestChoice(tmp,3-color).result;
+            if(-r>result){
+                result=-r;
+                point=[j,i];
+            }
+        }
+    }
+    return{
+        point:point,
+        result:point?result:0,
+    }
+
+}
+show(patten);
+</script>
+
+</html>
