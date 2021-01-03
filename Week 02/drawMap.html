@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title></title>
+    <style type="text/css">
+   body{
+    font-size: 0;
+   }
+    .cell {
+        display: inline-block;
+        line-height: 7px;
+        width: 6px;
+		height: 6px;
+        background-color: grey;
+        border-bottom: solid 1px white;
+        border-right: solid 1px white;
+        vertical-align: top;
+	}
+    #container {
+        width: 701px;
+    }
+    </style>
+</head>
+
+<body>
+    <div id="container"></div>
+    <button onclick="localStorage['map']=JSON.stringify(map)">save</button>
+</body>
+<script type="text/javascript">
+//map要是存在就从内存读取，不存在就创建，如果绘图出错，可以打印map，清除localStorage里的map再重新绘制。
+let map = localStorage["map"] ? JSON.parse(localStorage["map"]) : Array(10000).fill(0);
+// console.log(map);
+let container = document.getElementById("container");
+for (let y = 0; y < 100; y++) {
+    for (let x = 0; x < 100; x++) {
+        let cell = document.createElement('div');
+        cell.classList.add("cell");
+        if (map[100 * y + x] == 1)
+            cell.style.backgroundColor = "black";
+       
+        cell.addEventListener("mousemove", () => {
+            if (mousedown) {
+                if (clear) { //右键清除
+                    cell.style.backgroundColor = "";
+                    map[100 * y + x] = 0;
+                } else { //左键画图
+                    cell.style.backgroundColor = "black";
+                    map[100 * y + x] = 1;
+                }
+            }
+        })
+        container.appendChild(cell);
+    }
+}
+let mousedown = false;
+let clear = false;
+document.addEventListener("mousedown", e => {
+    mousedown = true;
+    clear = (e.which === 3) //左键是1，右键是3
+})
+document.addEventListener("mouseup", () => mousedown = false);
+document.addEventListener("contextmenu", e => e.preventDefault()); //阻止默认的右键下拉框出现
+</script>
+
+</html>
