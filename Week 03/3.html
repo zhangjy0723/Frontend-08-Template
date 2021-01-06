@@ -1,0 +1,108 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+</body> -->
+<script type="text/javascript">
+var regexp = /([0-9\.]+)|([ \t]+)|([\r\n]+)|(\*)|(\/)|(\+)|(\-)/g
+var dictionary = ["Number", "whitespace", "LineTerminator", "*", "/", "+", "-"];
+
+function* tokenize(source) {
+    var result = null;
+    var lastIndex = 0;
+    while (true) {
+        lastIndex = regexp.lastIndex;
+        result = regexp.exec(source); //每次去匹配一个
+        // console.log("result----", result);
+        if (!result) break;
+        if (regexp.lastIndex - lastIndex > result[0].length) break;
+        let token = {
+            type: null,
+            value: null
+        }
+        for (var i = 1; i <= dictionary.length; i++) { //从1开始，因为第一个匹配的是全部
+            if (result[i]) {
+                //i对应的字典中是i-1，因为i是从1开始匹配的
+                // console.log("----dictionary--", dictionary[i - 1])
+                token.type = dictionary[i - 1];
+            }
+        }
+        token.value = result[0];
+        yield token;
+    }
+    yield {
+        type: "EOF" //结束标志
+    }
+
+}
+
+let source = [];
+for (let token of tokenize("10*25/2")) {
+    if (token.type != "whitespace" && token.type != "LineTerminator") {
+        source.push(token);
+    }
+}
+
+console.log("---1--",source)
+
+function Expression(token) {
+
+}
+
+function AdditiveExpression(source) {
+
+}
+
+function MutiplicativeExpression(source) {
+    // console.log(source);
+    if (source[0].type === "Number") {
+        let node = {
+            type: "MutiplicativeExpression",
+            children: [source[0]]
+        }
+        source[0] = node;
+        return MutiplicativeExpression(source);
+    }
+    console.log("------0",source)
+    if (source[0].type === "MutiplicativeExpression" && source[1] && source[1].type === "*"){
+        let node={
+            type:"MutiplicativeExpression",
+            operator:"*",
+            children:[],
+        }
+        console.log("-----1",source)
+        node.children.push(source.shift());
+        node.children.push(source.shift());
+        node.children.push(source.shift());
+        source.unshift(node);
+        console.log("-------2")
+        return MutiplicativeExpression(source);
+    }
+    if (source[0].type === "MutiplicativeExpression" && source[1] && source[1].type === "/"){
+        let node={
+            type:"MutiplicativeExpression",
+            operator:"/",
+            children:[],
+        }
+        node.children.push(source.shift());
+        node.children.push(source.shift());
+        node.children.push(source.shift());
+        source.unshift(node);
+        return MutiplicativeExpression(source);
+    }
+    if(source[0].type==="MutiplicativeExpression"){
+        return source[0];
+    }
+    return MutiplicativeExpression(source);
+}
+console.log("-----",source)
+console.log(MutiplicativeExpression(source));
+
+</script>
+<!-- </html> -->
