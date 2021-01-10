@@ -16,11 +16,12 @@ var dictionary = ["Number", "whitespace", "LineTerminator", "*", "/", "+", "-"];
 function tokenize(source) {
     var result = null;
     while (true) {
-        result = regexp.exec(source);
+        result = regexp.exec(source);//每次去匹配一个
         console.log("result----", result);
         if (!result) break;
-        for (let i = 1; i <= dictionary.length; i++) {
+        for (let i = 1; i <= dictionary.length; i++) {//从1开始，因为第一个匹配的是全部
             if (result[i]) {
+                //i对应的字典中是i-1，因为i是从1开始匹配的
                 console.log("----dictionary--", dictionary[i - 1])
             }
             console.log(result);
