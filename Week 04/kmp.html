@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+</body>
+<script>
+function kmp(source,pattern) {
+    let table = new Array(pattern.length).fill(0);   
+    //记录pattern里重复的字符
+    {
+        let i = 1, j = 0; 
+        while (i < pattern.length) {
+            if (pattern[i] === pattern[j]) {
+                ++i, ++j;
+                console.log(i);
+                table[i] = j;
+            } else {
+                if (j > 0) {
+                    j = table[j];
+                } else
+                    ++i;
+            }          
+        }
+    }
+    {
+        let i = 0, j = 0;//i是source串的位置，j是pattern的位置
+        while (i < source.length) {
+            if (pattern[j] === source[i]) {
+                ++i, ++j;
+            } else {
+                if (j > 0) {
+                    j = table[j];
+                } else
+                    ++i;
+            }
+            if (j === pattern.length)
+                return true;
+        }
+        return false;
+    }
+}
+
+console.log(kmp("aabchahggg","hggc"));
+</script>
+
+</html>
