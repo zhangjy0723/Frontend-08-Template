@@ -1,0 +1,94 @@
+<input type="range" id="r" min=0 max=255>
+<input type="range" id="g" min=0 max=255>
+<input type="range" id="b" min=0 max=255>
+<div id="color" style="width:100px;height:100px">
+    
+</div>
+<script>
+let callbacks = new Map(); //要用object的key 去找到reactives
+let object = {
+    a:1,
+    b:2,
+    c:3
+}
+let reactivties = new Map();//每个对象调用reactivties时，加一个缓存
+let usedReactivties = [];
+//po对object做了一个简单的代理,监听对object属性相关的操作
+let po = reactive(object);
+
+//直接监听po上的属性,读取了po.a属性，所以触发get。这个函数是自定义的？
+//如果object里面的属性也是一个对象
+//把dom的值改成po来赋值,以下的几个可以写在一个effect中，老师为什么写在三个中？为了更能看懂吗？
+effect(() => {
+    // console.log("-----1", po.a.b);
+    document.getElementById("r").value = po.a;
+    document.getElementById("g").value = po.b;
+    document.getElementById("b").value = po.c;
+    document.getElementById("color").style.backgroundColor=`rgb(${po.a},${po.b},${po.c})`
+})
+//获取dom的值赋给po，实现双向绑定
+document.getElementById("r").addEventListener("input", event => {
+    po.a = event.target.value;
+})
+document.getElementById("g").addEventListener("input", event => {
+    po.b = event.target.value;
+})
+document.getElementById("b").addEventListener("input", event => {
+    po.c = event.target.value;
+})
+
+
+function effect(callback) {
+    // callbacks.push(callback);
+    usedReactivties = [];
+    callback();
+    console.log(usedReactivties);
+    // console.log("1---callbacks", callbacks)
+    for (let reactivty of usedReactivties) {
+        // console.log("reactivty", reactivty)
+        //防止重复注册
+        if (!callbacks.has(reactivty[0])) {
+            callbacks.set(reactivty[0], new Map()) //第一层放对象，第二层放属性
+            // console.log("2-----callbacks", callbacks)
+        }
+        if (!callbacks.get(reactivty[0]).has(reactivty[1])) {
+            callbacks.get(reactivty[0]).set(reactivty[1], []);
+            // console.log("3-----callbacks", callbacks)
+        }
+        callbacks.get(reactivty[0]).get(reactivty[1]).push(callback);
+    }
+
+}
+
+function reactive(object) {
+    if(reactivties.has(object))
+        return reactivties.get(object);
+    let proxy = new Proxy(object, {
+        get(obj, prop) {
+            // console.log("---get");
+            usedReactivties.push([obj, prop]);
+            //当object的属性是一个对象
+            if(typeof obj[prop] === "object")
+                //这里返回会生成新的Proxy
+                return reactive(obj[prop]);
+            return obj[prop];
+        },
+        //执行set会触发effect?然后对callbacks赋值？
+        set(obj, prop, val) {
+            // console.log("---set");
+            obj[prop] = val;
+            if (callbacks.get(obj))
+                if (callbacks.get(obj).get(prop)) {
+                    //有索引，所以不需要去循环整个callbacks
+                    for (let callback of callbacks.get(obj).get(prop)) {
+                        callback();
+                    }
+                }
+            return obj[prop];
+        }
+    })
+    reactivties.set(object, proxy);
+    return proxy;
+}
+// console.log("----", po.a.b = 5)
+</script>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <div id="dragable" style="background-color:green;width:100px;height:100px"></div>
+</body>
+<script>
+let dragable = document.getElementById("dragable");
+let baseX = 0, baseY = 0;
+//把mousemove和mouseup放在mousedown里面去监听，防止鼠标一移动就触发事件
+dragable.addEventListener("mousedown", event => {
+    let startX = event.clientX;
+    let startY = event.clientY;
+    //baseX,baseY记录元素左上角距离浏览器左边和上边的距离
+    let up = event => {
+        baseX = baseX + event.clientX - startX;
+        baseY = baseY + event.clientY - startY;
+        document.removeEventListener("mousemove", move);
+        document.removeEventListener("mouseup", up);
+    }
+
+    let move = event => {
+    	console.log(baseX,event.clientX,startX);
+        dragable.style.transform = `translate(${baseX + event.clientX - startX}px, ${baseY + event.clientY - startY}px)`
+    }
+    document.addEventListener("mousemove", move);
+    document.addEventListener("mouseup", up);
+
+})
+</script>
+
+</html>

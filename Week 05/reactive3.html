@@ -1,0 +1,61 @@
+<script>
+let callbacks = new Map(); //要用object的key 去找到reactives
+let object = {
+    a: 1,
+    b: 2
+}
+let usedReactivties = [];
+//po对object做了一个简单的代理,监听对object属性相关的操作
+let po = reactive(object);
+
+//直接监听po上的属性,读取了po.a属性，所以触发get。这个函数是自定义的？
+effect(() => {
+    console.log("-----1", po.a);
+})
+
+function effect(callback) {
+    // callbacks.push(callback);
+    usedReactivties = [];
+    callback();
+    console.log(usedReactivties);
+    console.log("1---callbacks", callbacks)
+    for (let reactivty of usedReactivties) {
+        console.log("reactivty", reactivty)
+        //防止重复注册
+        if (!callbacks.has(reactivty[0])) {
+            callbacks.set(reactivty[0], new Map()) //第一层放对象，第二层放属性
+            console.log("2-----callbacks", callbacks)
+        }
+        if (!callbacks.get(reactivty[0]).has(reactivty[1])) {
+            callbacks.get(reactivty[0]).set(reactivty[1], []);
+            console.log("3-----callbacks", callbacks)
+        }
+        callbacks.get(reactivty[0]).get(reactivty[1]).push(callback);
+    }
+
+}
+
+function reactive(object) {
+    return new Proxy(object, {
+        get(obj, prop) {
+            console.log("---get");
+            usedReactivties.push([obj, prop]);
+            return obj[prop];
+        },
+        //执行set会触发effect?然后对callbacks赋值？
+        set(obj, prop, val) {
+            // console.log("---set");
+            obj[prop] = val;
+            if (callbacks.get(obj))
+                if (callbacks.get(obj).get(prop)) {
+                    //有索引，所以不需要去循环整个callbacks
+                    for (let callback of callbacks.get(obj).get(prop)) {
+                        callback();
+                    }
+                }
+            return obj[prop];
+        }
+    })
+}
+// console.log("----", po.a = 5)
+</script>

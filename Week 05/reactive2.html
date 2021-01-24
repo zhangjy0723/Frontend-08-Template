@@ -1,0 +1,35 @@
+<script>
+	let callbacks = [];
+	let object = {
+		a:1,
+		b:2
+	}
+	//po对object做了一个简单的代理,监听对object属性相关的操作
+	let po = reactive(object);
+
+	//直接监听po上的属性
+	effect(() => {
+		console.log("-----1",po.a);
+	})
+
+	function effect(callback) {
+		callbacks.push(callback);
+	}
+
+	function reactive(object) {
+		return new Proxy(object, {
+			get(obj, prop) {
+				return obj[prop];
+			},
+			//执行set会触发effect?然后对callbacks赋值？
+			set(obj, prop, val) {
+				 obj[prop] = val;
+				 for(let callback of callbacks){
+				 	callback();//??为什么触发了effect
+				 }
+				 return obj;
+			}
+		})
+	}
+	console.log("----", po.a=33)
+</script>
